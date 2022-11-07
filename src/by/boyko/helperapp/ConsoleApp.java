@@ -1,13 +1,11 @@
 package by.boyko.helperapp;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ConsoleApp {
     private String homePath;
@@ -22,27 +20,32 @@ public class ConsoleApp {
 
     public List<Path> findByFolderName(String folderName) throws IOException {
         String pathStart = "D:\\";
-        List<Path> results = null;
+        List<Path> results = new ArrayList<>();
+        Files.walkFileTree(Paths.get(pathStart), Collections.singleton(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                if (dir.toAbsolutePath().endsWith(folderName)) {
+                    results.add(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+                return FileVisitResult.CONTINUE;
+            }
 
-//        try (Stream<Path> pathStream = Files.find(Paths.get(pathStart), Integer.MAX_VALUE, (p, basicFileAttributes) -> {
-//            if (Files.isRegularFile(p) || !Files.isReadable(p) || !Files.isWritable(p)) {
-//                return false;
-//            }
-//
-//            return p.endsWith(folderName);
-//        }, FileVisitOption.FOLLOW_LINKS)) {
-//            results = pathStream.collect(Collectors.toList());
-//        } catch (AccessDeniedException ade) {
-//            System.out.println("файлик не читаица :((");
-//        }
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
 
-        try (Stream<Path> walk = Files.walk(Paths.get(pathStart))) {
-            results = walk.filter(Files::isDirectory)
-                    .map(Path::toFile)
-                    .filter(File::canWrite)
-                    .map(File::toPath)
-                    .collect(Collectors.toList());
-        }
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+        });
 
         return results;
     }

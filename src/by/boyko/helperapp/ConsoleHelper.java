@@ -17,14 +17,20 @@ import java.util.List;
 
 public class ConsoleHelper {
     public static void main(String[] args) {
+        String greetings = "Hello! This is a console helper!";
         Path path;
         Scanner scanner = new Scanner(System.in);
         String[] defaultPaths = {"C:\\", "D:\\"};
+
+
+        System.out.println(greetings);
+
         System.out.println("Введите название начальной папки");
         String p = scanner.next();
+        System.out.println("Ожидайте, поиск нужной папки может занять некоторое время...");
         // пользователь вводит имя папки, в которой будет произведена работа (Desktop)
         if (p == "") {
-            path = Paths.get("C:\\");
+            path = Paths.get("D:\\");
         }
 
         ConsoleApp app = new ConsoleApp();
@@ -36,6 +42,15 @@ public class ConsoleHelper {
             ioe.printStackTrace();
         }
 
-        System.out.println(paths);
+        if (paths.size() > 0) {
+            System.out.println("Обнаружено " + paths.size() + " совпадений по имени файла! Какой именно вы предпочтете использовать?");
+            for (int i = 0; i < paths.size(); i++) {
+                System.out.println((i + 1) + ". " + paths.get(i));
+            }
+            System.out.println("Нажмите номер пути, который вам подходит: ");
+            int userChoice = scanner.nextInt();
+            System.out.println("Ваша корневая папка:");
+            System.out.println(paths.get(userChoice - 1));
+        }
     }
 }
